@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Request Rejected{% endblock %}
+
+{% block content %}
+<style>
+    .status-container {
+        max-width: 600px;
+        margin: 150px auto;
+        background: white;
+        padding: 80px;
+        border-radius: 25px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+    h1 { font-size: 48px; color: #dc3545; margin-bottom: 30px; }
+    p { font-size: 22px; color: #666; margin: 30px 0; }
+    .home-btn {
+        background: linear-gradient(45deg, #2575fc, #6a11cb);
+        color: white;
+        padding: 18px 50px;
+        border-radius: 60px;
+        font-size: 20px;
+        display: inline-block;
+        margin-top: 20px;
+        transition: all 0.5s;
+    }
+    .home-btn:hover { transform: translateY(-5px); }
+</style>
+
+<div class="status-container">
+    <h1>Request Rejected</h1>
+    <p>Sorry, the owner has rejected your entry request.</p>
+    <p>You may try again later or contact the resident directly.</p>
+    <a href="{% url 'home' %}" class="home-btn">Back to Home</a>
+</div>
+{% endblock %}

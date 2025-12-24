@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Register Owner{% endblock %}
+
+{% block content %}
+<style>
+    .register-container {
+        max-width: 700px;
+        margin: 50px auto;
+        background: white;
+        padding: 60px;
+        border-radius: 25px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        animation: fadeIn 1s ease;
+    }
+    h1 { text-align: center; margin-bottom: 30px; font-size: 38px;
+        background: linear-gradient(90deg, #6a11cb, #2575fc);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+    }
+    label { display: block; margin: 20px 0 8px; font-weight: 600; }
+    input, select, textarea {
+        width: 100%;
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    #building-fields { 
+        display: none; 
+        margin-top: 20px; 
+        padding: 20px;
+        background: #f8fbff;
+        border-radius: 15px;
+        transition: all 0.5s ease;
+    }
+    .submit-btn {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        border-radius: 60px;
+        font-size: 20px;
+        margin-top: 30px;
+        cursor: pointer;
+        transition: all 0.5s;
+    }
+    .submit-btn:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255,107,107,0.4); }
+    .note { background: #e0f7fa; padding: 20px; border-radius: 15px; margin-top: 30px; font-size: 15px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<div class="register-container">
+    <h1>House Owner Registration</h1>
+    <p style="text-align:center; margin-bottom:40px;">Get your unique QR code for visitor management</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.username.label_tag }} {{ form.username }}
+        {{ form.email.label_tag }} {{ form.email }}
+        {{ form.full_name.label_tag }} {{ form.full_name }}
+        {{ form.phone.label_tag }} {{ form.phone }}
+        {{ form.password1.label_tag }} {{ form.password1 }}
+        {{ form.password2.label_tag }} {{ form.password2 }}
+
+        <label for="id_property_type">Property Type *</label>
+        {{ form.property_type }}
+
+        <label for="id_address">Full Address *</label>
+        {{ form.address }}
+
+        <div id="building-fields">
+            <label for="id_building_name">Building / Society Name</label>
+            {{ form.building_name }}
+
+            <label for="id_flat_no">Flat / Room Number</label>
+            {{ form.flat_no }}
+        </div>
+
+        <button type="submit" class="submit-btn">Register & Generate QR</button>
+    </form>
+
+    <div class="note">
+        <strong>Note:</strong><br>
+        • <strong>Bungalow</strong>: You get a unique QR code.<br>
+        • <strong>Building</strong>: Only one QR per building. If already registered, you'll be added as resident.
+    </div>
+</div>
+
+<script>
+    // Correct JavaScript to show/hide building fields
+    const propertyTypeSelect = document.getElementById('id_property_type');
+    const buildingFields = document.getElementById('building-fields');
+
+    function toggleBuildingFields() {
+        if (propertyTypeSelect.value === 'building') {
+            buildingFields.style.display = 'block';
+            document.getElementById('id_building_name').required = true;
+            document.getElementById('id_flat_no').required = true;
+        } else {
+            buildingFields.style.display = 'none';
+            document.getElementById('id_building_name').required = false;
+            document.getElementById('id_flat_no').required = false;
+        }
+    }
+
+    // Run on page load and on change
+    toggleBuildingFields();
+    propertyTypeSelect.addEventListener('change', toggleBuildingFields);
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Waiting for Approval{% endblock %}
+
+{% block content %}
+<style>
+    .waiting-container {
+        max-width: 600px;
+        margin: 150px auto;
+        background: white;
+        padding: 80px;
+        border-radius: 25px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+    h1 { font-size: 42px; margin-bottom: 30px; color: #2575fc; }
+    .spinner {
+        width: 80px; height: 80px; border: 8px solid #f3f3f3; border-top: 8px solid #2575fc;
+        border-radius: 50%; animation: spin 1s linear infinite; margin: 40px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<div class="waiting-container">
+    <h1>Waiting for Approval...</h1>
+    <p>Your request has been sent to the owner.</p>
+    <p>Please wait while they review it.</p>
+    <div class="spinner"></div>
+</div>
+
+<script>
+    // Poll every 5 seconds to check status
+    const entryId = {{ entry.id }};
+
+    function checkStatus() {
+        fetch(`/check-status/${entryId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'approved') {
+                    window.location.href = '/request-approved/';
+                } else if (data.status === 'rejected') {
+                    window.location.href = '/request-rejected/';
+                }
+            });
+    }
+
+    setInterval(checkStatus, 5000);
+    checkStatus();  // Check immediately
+</script>
+{% endblock %}

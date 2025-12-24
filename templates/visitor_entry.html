@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Visitor Entry{% endblock %}
+
+{% block content %}
+<style>
+    .visitor-container {
+        max-width: 600px;
+        margin: 100px auto;
+        background: white;
+        padding: 60px;
+        border-radius: 25px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        text-align: center;
+        animation: fadeIn 1s ease;
+    }
+    h1 { font-size: 38px; margin-bottom: 20px;
+        background: linear-gradient(90deg, #6a11cb, #2575fc);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+    }
+    label { display: block; margin: 20px 0 8px; font-weight: 600; text-align: left; }
+    input, select, textarea {
+        width: 100%;
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    #id_other_reason { display: none; }
+    .photo-preview {
+        width: 150px; height: 150px; border-radius: 50%; object-fit: cover;
+        margin: 20px auto; display: block; border: 5px solid #2575fc;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .submit-btn {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        border-radius: 60px;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.5s;
+    }
+    .submit-btn:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(40,167,69,0.4); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<div class="visitor-container">
+    <h1>Visitor Entry Request</h1>
+    <p>Welcome to {{ property.address }}</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <img id="photo-preview" class="photo-preview" src="" alt="Photo Preview" style="display:none;">
+
+        <button type="submit" class="submit-btn">Send Request to Owner</button>
+    </form>
+</div>
+
+<script>
+    // Show other reason field
+    document.getElementById('id_reason').addEventListener('change', function() {
+        const other = document.getElementById('id_other_reason').parentElement;
+        if (this.value === 'other') {
+            other.style.display = 'block';
+        } else {
+            other.style.display = 'none';
+        }
+    });
+
+    // Photo preview
+    document.getElementById('id_visitor_photo').addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            document.getElementById('photo-preview').src = URL.createObjectURL(e.target.files[0]);
+            document.getElementById('photo-preview').style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}

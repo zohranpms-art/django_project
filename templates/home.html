@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - SecureVisit{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        height: 100vh;
+        background: linear-gradient(135deg, rgba(106,17,203,0.9), rgba(37,117,252,0.9)), url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1920') center/cover no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+    .hero h1 { font-size: 62px; margin-bottom: 30px; }
+    .hero p { font-size: 26px; margin-bottom: 60px; }
+    .cta-btn {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 20px 50px;
+        border-radius: 60px;
+        font-size: 22px;
+        font-weight: 700;
+        box-shadow: 0 12px 35px rgba(255,107,107,0.4);
+        transition: all 0.6s;
+    }
+    .cta-btn:hover { transform: translateY(-10px); }
+
+    .test-section {
+        max-width: 900px;
+        margin: 100px auto;
+        background: white;
+        padding: 60px;
+        border-radius: 25px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+    .test-btn {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 20px 60px;
+        border-radius: 60px;
+        font-size: 24px;
+        font-weight: 700;
+        display: inline-block;
+        margin: 30px 0;
+        transition: all 0.5s;
+    }
+    .test-btn:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(40,167,69,0.4); }
+
+    .section { max-width: 1400px; margin: 140px auto; padding: 0 40px; text-align: center; }
+    .section h2 { font-size: 48px; margin-bottom: 100px;
+        background: linear-gradient(90deg, #6a11cb, #ff6b6b);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+    }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 60px; }
+    .card {
+        background: white; padding: 60px 40px; border-radius: 25px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12); transition: all 0.6s;
+    }
+    .card:hover { transform: translateY(-25px); }
+    .card img { width: 100%; border-radius: 20px; margin-bottom: 30px; }
+</style>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div>
+        <h1>Secure & Smart Visitor Management</h1>
+        <p>QR Entry • Photo Registration • Instant Approval</p>
+        <a href="{% url 'register' %}" class="cta-btn">Register as Owner</a>
+    </div>
+</section>
+
+<!-- Test Visitor Flow Section -->
+<section class="test-section">
+    <h2>Test Visitor Request & Approval Flow</h2>
+    <p style="font-size:18px; margin:30px 0; color:#666;">
+        Register an owner first to get a property and QR code.<br>
+        Then use this link to simulate a visitor scanning the QR and sending a request.
+    </p>
+
+    {% if test_property_id %}
+        <a href="{% url 'visitor_entry' test_property_id %}" class="test-btn">
+            Test Visitor Request (Property ID: {{ test_property_id }})
+        </a>
+        <p style="color:#666;">
+            1. Fill visitor details → Submit<br>
+            2. Go to Dashboard → See pending request<br>
+            3. Click review → Approve or Reject
+        </p>
+    {% else %}
+        <p style="color:#dc3545; font-size:20px;">
+            No property registered yet.<br>
+            Register an owner to enable testing!
+        </p>
+        <a href="{% url 'register' %}" class="test-btn">Register Owner Now</a>
+    {% endif %}
+</section>
+
+<!-- Other Sections (Pricing, QR, Clients) -->
+<section class="section" id="pricing">
+    <h2>Pricing Plans</h2>
+    <div class="card-grid">
+        <div class="card">
+            <img src="https://via.placeholder.com/400x250?text=Monthly+Plan" alt="Monthly">
+            <h3>Monthly</h3>
+            <p>Affordable and flexible</p>
+        </div>
+        <div class="card">
+            <img src="https://via.placeholder.com/400x250?text=Yearly+Plan" alt="Yearly">
+            <h3>Yearly</h3>
+            <p>Best value – save more!</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Get Your QR Code</h2>
+    <div class="card-grid">
+        <div class="card">
+            <img src="https://www.teamgo.co/wp-content/uploads/2022/02/Block-Print-QR-Code-Poster.png" alt="QR Poster">
+            <h3>Instant Generation</h3>
+            <p>Print-ready QR after registration</p>
+        </div>
+        <div class="card">
+            <img src="https://via.placeholder.com/400x250?text=Manage+QR" alt="Manage">
+            <h3>Easy Management</h3>
+            <p>Update anytime</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Happy Clients</h2>
+    <div class="card-grid">
+        <div class="card">
+            <img src="https://embedsocial.com/wp-content/uploads/2022/06/ScreenShot2022-05-23at20_50_42_9e4438cca1665562c76c372c9dc2d7f7_800.png" alt="Testimonial">
+            <h3>Amazing!</h3>
+            <p>"Transformed our society entry"</p>
+        </div>
+        <div class="card">
+            <img src="https://skeepers.io/app/uploads/2024/01/positive-review-examples-hero.jpg" alt="Testimonial">
+            <h3>Highly Recommend</h3>
+            <p>"Best investment"</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

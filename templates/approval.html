@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Approve Visitor{% endblock %}
+
+{% block content %}
+<style>
+    .approval-container {
+        max-width: 700px;
+        margin: 100px auto;
+        background: white;
+        padding: 60px;
+        border-radius: 25px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+    h1 { font-size: 38px; margin-bottom: 30px;
+        background: linear-gradient(90deg, #6a11cb, #2575fc);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+    }
+    .visitor-photo {
+        width: 200px; height: 200px; border-radius: 50%; object-fit: cover;
+        border: 8px solid #2575fc; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(37,117,252,0.3);
+    }
+    .details {
+        background: #f8fbff;
+        padding: 30px;
+        border-radius: 20px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    .detail-row {
+        display: flex; justify-content: space-between; padding: 12px 0;
+        border-bottom: 1px dashed #ddd; font-size: 18px;
+    }
+    .btn {
+        padding: 18px 60px; border: none; border-radius: 60px; font-size: 20px;
+        margin: 20px; cursor: pointer; transition: all 0.5s;
+    }
+    .approve { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
+    .reject { background: linear-gradient(45deg, #dc3545, #fd7e14); color: white; }
+    .btn:hover { transform: translateY(-8px); }
+</style>
+
+<div class="approval-container">
+    <h1>Visitor Request</h1>
+    <img src="{{ entry.visitor_photo.url }}" class="visitor-photo" alt="Visitor Photo">
+
+    <div class="details">
+        <div class="detail-row"><strong>Name:</strong> <span>{{ entry.visitor_name }}</span></div>
+        <div class="detail-row"><strong>Phone:</strong> <span>{{ entry.visitor_phone }}</span></div>
+        <div class="detail-row"><strong>Reason:</strong> <span>{{ entry.get_reason_display }}</span></div>
+        {% if entry.other_reason %}
+            <div class="detail-row"><strong>Message:</strong> <span>{{ entry.other_reason }}</span></div>
+        {% endif %}
+        <div class="detail-row"><strong>Time:</strong> <span>{{ entry.request_time }}</span></div>
+        <div class="detail-row"><strong>Property:</strong> <span>{{ entry.property.address }}</span></div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="approve" class="btn approve">Approve Entry</button>
+        <button type="submit" name="action" value="reject" class="btn reject">Reject Entry</button>
+    </form>
+</div>
+{% endblock %}

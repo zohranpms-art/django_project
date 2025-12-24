@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - SecureVisit{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 100px auto 50px;
+        padding: 20px;
+    }
+    .section-card {
+        background: white;
+        padding: 50px;
+        margin-bottom: 60px;
+        border-radius: 25px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+        text-align: center;
+    }
+    .section-card h2 {
+        font-size: 36px;
+        margin-bottom: 40px;
+        background: linear-gradient(90deg, #6a11cb, #2575fc);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+    }
+    .properties-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 40px;
+        margin-top: 30px;
+    }
+    .property-item {
+        background: #f8fbff;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+    .property-item img {
+        max-width: 200px;
+        margin: 20px 0;
+        border: 5px solid #2575fc;
+        border-radius: 15px;
+    }
+    .test-btn {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 60px;
+        font-size: 18px;
+        font-weight: 700;
+        display: inline-block;
+        margin-top: 20px;
+        transition: all 0.5s;
+    }
+    .test-btn:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(40,167,69,0.4); }
+
+    .pending-list {
+        text-align: left;
+        max-width: 800px;
+        margin: 30px auto 0;
+    }
+    .pending-item {
+        background: #f8fbff;
+        padding: 25px;
+        margin: 15px 0;
+        border-radius: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .pending-item strong { font-size: 20px; }
+    .review-btn {
+        background: #2575fc;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+    .no-data {
+        color: #666;
+        font-size: 18px;
+        margin: 40px 0;
+    }
+</style>
+
+<div class="dashboard-container">
+    <h1 style="text-align:center; font-size:48px; margin-bottom:60px;">
+        Welcome back, <strong>{{ user.username }}</strong>!
+    </h1>
+
+    <!-- Properties Section -->
+    <div class="section-card">
+        <h2>Your Registered Properties</h2>
+        {% if properties %}
+            <div class="properties-grid">
+                {% for prop in properties %}
+                    <div class="property-item">
+                        <p><strong>Type:</strong> {{ prop.get_property_type_display }}</p>
+                        <p><strong>Address:</strong> {{ prop.address }}</p>
+                        {% if prop.building_name %}
+                            <p><strong>Building:</strong> {{ prop.building_name }}</p>
+                        {% endif %}
+                        {% if prop.flat_no %}
+                            <p><strong>Flat No:</strong> {{ prop.flat_no }}</p>
+                        {% endif %}
+
+                        {% if prop.qr_code %}
+                            <img src="{{ prop.qr_code.url }}" alt="Your QR Code">
+                            <p style="margin-top:15px; color:#666;">Print this QR and place at entrance</p>
+                        {% else %}
+                            <p>No QR generated yet.</p>
+                        {% endif %}
+
+                        <!-- Test visitor request for this property -->
+                        <a href="{% url 'visitor_entry' prop.id %}" class="test-btn">
+                            Test Visitor Request for This Property
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No properties registered yet. <a href="{% url 'register' %}">Register now</a></p>
+        {% endif %}
+    </div>
+
+    <!-- Pending Requests Section -->
+    <div class="section-card">
+        <h2>Pending Visitor Requests</h2>
+        {% if pending_requests %}
+            <div class="pending-list">
+                {% for entry in pending_requests %}
+                    <div class="pending-item">
+                        <div>
+                            <strong>{{ entry.visitor_name }}</strong><br>
+                            <small>Phone: {{ entry.visitor_phone }} | Reason: {{ entry.get_reason_display }}</small><br>
+                            <small>Requested {{ entry.request_time|timesince }} ago</small>
+                        </div>
+                        <a href="{% url 'approve_entry' entry.id %}" class="review-btn">
+                            Review & Approve
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No pending visitor requests at the moment.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
