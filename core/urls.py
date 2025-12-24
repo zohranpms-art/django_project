@@ -10,4 +10,5 @@ urlpatterns = [
     path('check-status/<int:entry_id>/', views.check_status, name='check_status'),
     path('request-approved/', render, {'template_name': 'request_approved.html'}, name='request_approved'),
     path('request-rejected/', render, {'template_name': 'request_rejected.html'}, name='request_rejected'),
+    path('gate/', views.watchman_gate, name='watchman_gate'),
 ]

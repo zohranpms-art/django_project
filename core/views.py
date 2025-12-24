@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
 from .forms import VisitorEntryForm
 from .models import Property, VisitorEntry
 
 def home(request):
-    # Get first property for test link
+    # Get first property for test link on home page
     test_property = Property.objects.first()
     test_property_id = test_property.id if test_property else None
     return render(request, 'home.html', {
@@ -31,7 +32,8 @@ def visitor_entry(request, property_id):
             if entry.reason != 'other':
                 entry.other_reason = ''
             entry.save()
-            return render(request, 'waiting.html')
+            # Pass entry to waiting page for polling
+            return render(request, 'waiting.html', {'entry': entry})
     else:
         form = VisitorEntryForm()
     return render(request, 'visitor_entry.html', {'form': form, 'property': property})
@@ -47,10 +49,30 @@ def approve_entry(request, entry_id):
         return redirect('dashboard')
     return render(request, 'approval.html', {'entry': entry})
 
-
-
-from django.http import JsonResponse
-
+# AJAX endpoint for waiting page to check status
 def check_status(request, entry_id):
     entry = get_object_or_404(VisitorEntry, id=entry_id)
     return JsonResponse({'status': entry.status})
+
+def watchman_gate(request):
+    approved_visitors = VisitorEntry.objects.filter(status='approved').order_by('-request_time')[:20]
+    rejected_visitors = VisitorEntry.objects.filter(status='rejected').order_by('-request_time')[:20]
+    pending_visitors = VisitorEntry.objects.filter(status='pending').order_by('-request_time')
+
+    if request.method == 'POST':
+        entry_id = request.POST.get('entry_id')
+        action = request.POST.get('action')
+        entry = get_object_or_404(VisitorEntry, id=entry_id)
+        if action == 'approve':
+            entry.status = 'approved'
+        elif action == 'reject':
+            entry.status = 'rejected'
+        entry.save()
+        messages.success(request, f'Visitor {entry.visitor_name} {entry.status.lower()} by watchman.')
+        return redirect('watchman_gate')
+
+    return render(request, 'watchman_gate.html', {
+        'approved_visitors': approved_visitors,
+        'rejected_visitors': rejected_visitors,
+        'pending_visitors': pending_visitors,
+    })
