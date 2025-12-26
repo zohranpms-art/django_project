@@ -55,9 +55,8 @@ def check_status(request, entry_id):
     return JsonResponse({'status': entry.status})
 
 def watchman_gate(request):
-    approved_visitors = VisitorEntry.objects.filter(status='approved').order_by('-request_time')[:20]
-    rejected_visitors = VisitorEntry.objects.filter(status='rejected').order_by('-request_time')[:20]
-    pending_visitors = VisitorEntry.objects.filter(status='pending').order_by('-request_time')
+    # Get all recent visitors (approved, rejected, pending) – latest first
+    all_visitors = VisitorEntry.objects.all().order_by('-request_time')[:100]
 
     if request.method == 'POST':
         entry_id = request.POST.get('entry_id')
@@ -72,7 +71,5 @@ def watchman_gate(request):
         return redirect('watchman_gate')
 
     return render(request, 'watchman_gate.html', {
-        'approved_visitors': approved_visitors,
-        'rejected_visitors': rejected_visitors,
-        'pending_visitors': pending_visitors,
+        'all_visitors': all_visitors,
     })

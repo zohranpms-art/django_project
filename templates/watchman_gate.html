@@ -4,156 +4,234 @@
 {% block content %}
 <style>
     .gate-container {
-        max-width: 1100px;
+        max-width: 900px;
         margin: 50px auto;
         padding: 20px;
     }
     h1 {
         text-align: center;
-        font-size: 42px;
-        margin-bottom: 60px;
+        font-size: 40px;
+        margin-bottom: 40px;
         background: linear-gradient(90deg, #6a11cb, #2575fc);
         -webkit-background-clip: text; background-clip: text;
         -webkit-text-fill-color: transparent; color: transparent;
     }
-    .section {
-        background: white;
-        padding: 40px;
-        border-radius: 25px;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-        margin-bottom: 50px;
-    }
-    .section h2 {
-        font-size: 32px;
-        text-align: center;
+
+    /* Search Bar */
+    .search-bar {
         margin-bottom: 30px;
-    }
-    .visitor-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 30px;
-    }
-    .visitor-card {
-        background: #f8fbff;
-        padding: 30px;
-        border-radius: 20px;
         text-align: center;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        position: relative;
     }
+    .search-bar input {
+        width: 100%;
+        max-width: 500px;
+        padding: 15px 15px 15px 50px;
+        border-radius: 50px;
+        border: 2px solid #ddd;
+        font-size: 18px;
+    }
+    .search-bar::before {
+        content: "🔍";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-220px);
+        top: 18px;
+        font-size: 20px;
+        pointer-events: none;
+    }
+
+    /* Visitor List */
+    .visitor-list {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .visitor-item {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    .visitor-item:last-child { border-bottom: none; }
+
     .visitor-photo {
-        width: 150px;
-        height: 150px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         object-fit: cover;
-        margin-bottom: 20px;
+        margin-right: 20px;
+        border: 4px solid;
+        cursor: pointer;
+        transition: transform 0.3s;
     }
-    .approved .visitor-photo { border: 6px solid #28a745; }
-    .rejected .visitor-photo { border: 6px solid #dc3545; }
-    .pending .visitor-photo { border: 6px solid #ffc107; }
+    .visitor-photo:hover { transform: scale(1.1); }
+    .approved .visitor-photo { border-color: #28a745; }
+    .rejected .visitor-photo { border-color: #dc3545; }
+    .pending .visitor-photo { border-color: #ffc107; }
 
-    .status-badge {
-        padding: 10px 25px;
-        border-radius: 30px;
+    .visitor-info {
+        flex-grow: 1;
+    }
+    .visitor-info h3 {
+        margin: 0;
+        font-size: 22px;
+    }
+    .visitor-info p {
+        margin: 5px 0 0;
+        color: #666;
         font-size: 16px;
-        font-weight: 700;
-        display: inline-block;
-        margin: 15px 0;
     }
-    .approved .status-badge { background: #d4edda; color: #155724; }
-    .rejected .status-badge { background: #f8d7da; color: #721c24; }
-    .pending .status-badge { background: #fff3cd; color: #856404; }
 
-    .action-btns { margin-top: 20px; }
+    .status {
+        font-size: 18px;
+        font-weight: 700;
+        padding: 10px 20px;
+        border-radius: 30px;
+        min-width: 180px;
+        text-align: center;
+    }
+    .approved .status { background: #d4edda; color: #155724; }
+    .rejected .status { background: #f8d7da; color: #721c24; }
+    .pending .status { background: #fff3cd; color: #856404; }
+
+    .action-btns {
+        margin-left: 20px;
+    }
     .btn {
-        padding: 12px 30px;
+        padding: 10px 25px;
         border: none;
         border-radius: 50px;
         font-size: 16px;
-        margin: 0 10px;
         cursor: pointer;
+        margin: 0 5px;
     }
     .approve { background: #28a745; color: white; }
     .reject { background: #dc3545; color: white; }
 
-    .no-data { text-align: center; color: #666; font-size: 20px; padding: 40px; }
+    .no-results {
+        text-align: center;
+        padding: 60px;
+        color: #666;
+        font-size: 20px;
+    }
+
+    /* Modal for Enlarged Photo */
+    .photo-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s;
+    }
+    .photo-modal img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 15px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .close-modal {
+        position: absolute;
+        top: 30px;
+        right: 40px;
+        color: white;
+        font-size: 50px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 
 <div class="gate-container">
     <h1>Gate Watchman Panel</h1>
 
-    <!-- Approved Visitors -->
-    <div class="section approved">
-        <h2>Approved Visitors (Allow Entry)</h2>
-        {% if approved_visitors %}
-            <div class="visitor-grid">
-                {% for entry in approved_visitors %}
-                    <div class="visitor-card">
-                        <img src="{{ entry.visitor_photo.url }}" class="visitor-photo" alt="{{ entry.visitor_name }}">
-                        <h3>{{ entry.visitor_name }}</h3>
-                        <p><strong>Phone:</strong> {{ entry.visitor_phone }}</p>
-                        <p><strong>Reason:</strong> {{ entry.get_reason_display }}</p>
-                        <p><strong>To:</strong> {{ entry.property.address }}</p>
-                        <p><strong>Time:</strong> {{ entry.request_time|date:"d M, H:i" }}</p>
-                        <div class="status-badge">APPROVED - ALLOW ENTRY</div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="no-data">No approved visitors right now.</p>
-        {% endif %}
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by name, phone, or address..." onkeyup="filterVisitors()">
     </div>
 
-    <!-- Rejected Visitors -->
-    <div class="section rejected">
-        <h2>Rejected Visitors (Do Not Allow)</h2>
-        {% if rejected_visitors %}
-            <div class="visitor-grid">
-                {% for entry in rejected_visitors %}
-                    <div class="visitor-card">
-                        <img src="{{ entry.visitor_photo.url }}" class="visitor-photo" alt="{{ entry.visitor_name }}">
-                        <h3>{{ entry.visitor_name }}</h3>
-                        <p><strong>Phone:</strong> {{ entry.visitor_phone }}</p>
-                        <p><strong>Reason:</strong> {{ entry.get_reason_display }}</p>
-                        <p><strong>To:</strong> {{ entry.property.address }}</p>
-                        <p><strong>Time:</strong> {{ entry.request_time|date:"d M, H:i" }}</p>
-                        <div class="status-badge">REJECTED - DO NOT ALLOW</div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="no-data">No rejected visitors.</p>
-        {% endif %}
-    </div>
+    <!-- All Visitors List -->
+    <div class="visitor-list" id="visitorList">
+        {% for entry in all_visitors %}
+            <div class="visitor-item {% if entry.status == 'approved' %}approved{% elif entry.status == 'rejected' %}rejected{% else %}pending{% endif %}" data-search="{{ entry.visitor_name|lower }} {{ entry.visitor_phone }} {{ entry.property.address|lower }}">
+                <img src="{{ entry.visitor_photo.url }}" class="visitor-photo" alt="{{ entry.visitor_name }}" onclick="openModal(this.src, '{{ entry.visitor_name }}')">
 
-    <!-- Pending Requests -->
-    <div class="section pending">
-        <h2>Pending Requests (Manual Action)</h2>
-        {% if pending_visitors %}
-            <div class="visitor-grid">
-                {% for entry in pending_visitors %}
-                    <div class="visitor-card">
-                        <img src="{{ entry.visitor_photo.url }}" class="visitor-photo" alt="{{ entry.visitor_name }}">
-                        <h3>{{ entry.visitor_name }}</h3>
-                        <p><strong>Phone:</strong> {{ entry.visitor_phone }}</p>
-                        <p><strong>Reason:</strong> {{ entry.get_reason_display }}</p>
-                        <p><strong>To:</strong> {{ entry.property.address }}</p>
-                        <p><strong>Time:</strong> {{ entry.request_time|date:"d M, H:i" }}</p>
-                        <div class="status-badge">PENDING</div>
+                <div class="visitor-info">
+                    <h3>{{ entry.visitor_name }}</h3>
+                    <p>{{ entry.property.address }} • {{ entry.get_reason_display }} • {{ entry.request_time|date:"d M, H:i" }}</p>
+                </div>
 
-                        <div class="action-btns">
-                            <form method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="entry_id" value="{{ entry.id }}">
-                                <button type="submit" name="action" value="approve" class="btn approve">Approve</button>
-                                <button type="submit" name="action" value="reject" class="btn reject">Reject</button>
-                            </form>
-                        </div>
+                <div class="status">
+                    {% if entry.status == 'approved' %}
+                        ALLOW ENTRY
+                    {% elif entry.status == 'rejected' %}
+                        DO NOT ALLOW
+                    {% else %}
+                        PENDING
+                    {% endif %}
+                </div>
+
+                {% if entry.status == 'pending' %}
+                    <div class="action-btns">
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="entry_id" value="{{ entry.id }}">
+                            <button type="submit" name="action" value="approve" class="btn approve">Approve</button>
+                            <button type="submit" name="action" value="reject" class="btn reject">Reject</button>
+                        </form>
                     </div>
-                {% endfor %}
+                {% endif %}
             </div>
-        {% else %}
-            <p class="no-data">No pending requests.</p>
-        {% endif %}
+        {% empty %}
+            <p class="no-results">No visitors recorded yet.</p>
+        {% endfor %}
     </div>
 </div>
+
+<!-- Enlarged Photo Modal -->
+<div id="photoModal" class="photo-modal" onclick="closeModal()">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="">
+    <div style="position:absolute; bottom:30px; color:white; font-size:24px;" id="modalName"></div>
+</div>
+
+<script>
+    function filterVisitors() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const items = document.getElementsByClassName('visitor-item');
+
+        for (let i = 0; i < items.length; i++) {
+            const text = items[i].getAttribute('data-search');
+            items[i].style.display = text.includes(filter) ? '' : 'none';
+        }
+    }
+
+    function openModal(src, name) {
+        const modal = document.getElementById('photoModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalName = document.getElementById('modalName');
+        modal.style.display = 'flex';
+        modalImg.src = src;
+        modalName.textContent = name;
+    }
+
+    function closeModal() {
+        document.getElementById('photoModal').style.display = 'none';
+    }
+
+    // Close modal when pressing ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>
 {% endblock %}
